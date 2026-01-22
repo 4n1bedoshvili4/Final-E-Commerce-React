@@ -1,73 +1,59 @@
-import logo from "../images/logo.svg";
-import avatar from "../images/image-avatar.png";
-import cartIcon from "../images/icon-cart.svg";
-import menu from "../images/icon-menu.svg";
-import "./Header.css";
-import { useState } from "react";
-import close from "../images/icon-close.svg";
-import Cart from "./Cart"
+import { NavLink } from "react-router-dom";
+import { useCart } from "../contexts/CartContext";
+import { useTheme } from "../contexts/ThemeContext";
+import { useI18n } from "../contexts/I18nContext";
 
-function Header() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [cartIsOpen, setCartIsOpen] = useState(false);
-
-  return (
-    <>
-      <header className="flex items-center justify-between p-8 border-b border-slate-400 max-w-7xl mx-auto relative">
-        <div className="flex items-center justify-start gap-4">
-          <ul className="flex items-center justify-start gap-4">
-            { !isOpen && <li className="lg:hidden">
-              <img
-                onClick={() => setIsOpen(true)}
-                src={menu}
-                alt=""
-                className="cursor-pointer"
-              />
-            </li>}
-            {isOpen && (
-              <li className="lg:hidden close">
-                <img
-                  onClick={() => setIsOpen(false)}
-                  src={close}
-                  alt=""
-                  className="cursor-pointer w-6"
-                />
-              </li>
-            )}
-            <li>
-              {" "}
-              <img src={logo} alt="" />
-            </li>
-          </ul>
-
-          <nav className={isOpen && "open"}>
-            <ul className="">
-              <li>Collections</li>
-              <li>Men</li>
-              <li>Women</li>
-              <li>About</li>
-              <li>Contact</li>
-            </ul>
-          </nav>
-        </div>
-        <div >
-          <ul className="flex items-center justify-start gap-4">
-            <li>
-              <button className="text-2xl text-slate-600" onClick={() => setCartIsOpen(!cartIsOpen)}>
-                <img className="w-3" src={cartIcon} alt="" />
-              </button>
-            </li>
-            <li>
-              {cartIsOpen && <Cart/>}
-            </li>
-            <li>
-              <img className="w-9" src={avatar} alt="" />
-            </li>
-          </ul>
-        </div>
-      </header>
-    </>
-  );
+function linkClass({ isActive }) {
+  return [
+    "rounded-lg px-3 py-2 text-sm font-medium transition",
+    isActive
+      ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
+      : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800",
+  ].join(" ");
 }
 
-export default Header;
+export default function Header() {
+  const { count } = useCart();
+  const { theme, setTheme } = useTheme();
+  const { lang, setLang, t } = useI18n();
+
+  return (
+    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/70">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+        <NavLink to="/" className="text-base font-bold tracking-tight dark:text-slate-100">
+          MiniShop
+        </NavLink>
+
+        <nav className="flex items-center gap-2">
+          <NavLink to="/" className={linkClass}>
+            {t("home")}
+          </NavLink>
+          <NavLink to="/cart" className={linkClass}>
+            {t("cart")}
+            <span className="ml-2 rounded-full bg-orange-500 px-2 py-0.5 text-xs font-semibold text-white">
+              {count}
+            </span>
+          </NavLink>
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-slate-800"
+            aria-label="Toggle theme"
+          >
+            {t("theme")}: {theme === "dark" ? t("dark") : t("light")}
+          </button>
+
+          <button
+            onClick={() => setLang(lang === "ka" ? "en" : "ka")}
+            className="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-slate-800"
+            aria-label="Toggle language"
+          >
+            {t("language")}: {lang.toUpperCase()}
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+}
